@@ -1,4 +1,6 @@
 mod cursor;
+#[cfg(feature = "r2d2")]
+pub mod r2d2;
 pub mod raw;
 #[doc(hidden)]
 pub mod result;

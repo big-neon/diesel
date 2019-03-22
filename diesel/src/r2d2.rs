@@ -30,7 +30,7 @@ use sql_types::HasSqlType;
 /// [r2d2 documentation]: ../../r2d2
 #[derive(Debug, Clone)]
 pub struct ConnectionManager<T> {
-    database_url: String,
+    pub(crate) database_url: String,
     _marker: PhantomData<T>,
 }
 
@@ -55,6 +55,12 @@ pub enum Error {
 
     /// An error occurred pinging the database
     QueryError(::result::Error),
+
+    /// The connection is not valid to be dispatched from
+    /// the pool. Returned from `is_valid`
+    InvalidConnectionError{
+        /// The reason that the connection is invalid
+        reason: String}
 }
 
 impl fmt::Display for Error {
@@ -62,6 +68,7 @@ impl fmt::Display for Error {
         match *self {
             Error::ConnectionError(ref e) => e.fmt(f),
             Error::QueryError(ref e) => e.fmt(f),
+            Error::InvalidConnectionError {ref reason} => f.write_str(reason)
         }
     }
 }
@@ -71,6 +78,7 @@ impl ::std::error::Error for Error {
         match *self {
             Error::ConnectionError(ref e) => e.description(),
             Error::QueryError(ref e) => e.description(),
+            Error::InvalidConnectionError {ref reason} => reason
         }
     }
 }
